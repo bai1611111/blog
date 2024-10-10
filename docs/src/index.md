@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "Easy VitePress Blog"
-  text: "轻松构建你的个人博客"
+  name: "距离"
+  text: "距离个人博客"
   tagline: "🚀Simple, robust and swift.Experience the enhanced VitePress for your blogging needs"
   image:
     src: /logo.png

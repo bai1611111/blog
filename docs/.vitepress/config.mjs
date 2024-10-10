@@ -4,8 +4,8 @@ import { getSidebar } from "./utils/getSidebar";
 
 export default defineConfig({
   // 标签上显示的网站标题
-  title: "Easy VitePress Blog",
-  titleTemplate: "Blog",
+  title: "距离",
+  titleTemplate: "博客",
   // 在标签上显示所的 logo
   head: [["link", { rel: "icon", href: "/logo.svg" }]],
 
