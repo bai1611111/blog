@@ -199,3 +199,334 @@ FROM employees e
 CROSS JOIN departments d;
 ```
 
+
+### 19.关联查询 - inner join
+INNER JOIN 只返回两个表中满足关联条件的交集部分，即在两个表中都存在的匹配行。
+```sql
+SELECT e.emp_name, e.salary, e.department, d.manager
+FROM employees e
+JOIN departments d ON e.department = d.department;
+```
+
+### 20.关联查询 - outer join
+在 SQL 中，OUTER JOIN 是一种关联查询方式，它根据指定的关联条件，将两个表中满足条件的行组合在一起，并 包含没有匹配的行 。
+
+在 OUTER JOIN 中，包括 LEFT OUTER JOIN 和 RIGHT OUTER JOIN 两种类型，它们分别表示查询左表和右表的所有行（即使没有被匹配），再加上满足条件的交集部分。
+
+假设有一个员工表 `employees`，包含以下字段：`emp_id`（员工编号）、`emp_name`（员工姓名）、`department`（所属部门）、`salary`（工资）。数据如下：
+
+| emp_id | emp_name | department | salary |
+| ------ | -------- | ---------- | ------ |
+| 1      | 小明     | 技术部     | 5000   |
+| 2      | 鸡哥     | 财务部     | 6000   |
+| 3      | 李华     | 销售部     | 4500   |
+
+
+
+假设还有一个部门表 `departments`，包含以下字段：`department`（部门名称）、`manager`（部门经理）、`location`（所在地）。数据如下：
+
+| department | manager | location |
+| ---------- | ------- | -------- |
+| 技术部     | 张三    | 上海     |
+| 财务部     | 李四    | 北京     |
+| 人事部     | 王五    | 广州     |
+| 摸鱼部     | 赵二    | 吐鲁番   |
+
+
+
+使用 LEFT JOIN 进行关联查询，根据员工表和部门表之间的部门名称进行匹配，将员工的姓名、工资以及所属部门和部门经理组合在一起，并包含所有员工的信息：
+
+```sql
+SELECT e.emp_name, e.salary, e.department, d.manager
+FROM employees e
+LEFT JOIN departments d ON e.department = d.department;
+```
+
+
+
+查询结果：
+
+| emp_name | salary | department | manager |
+|----------|--------|------------|---------|
+| 小明     | 5000   | 技术部     | 张三    |
+| 鸡哥     | 6000   | 财务部     | 李四    |
+| 李华     | 4500   | 销售部     | NULL    |
+
+### 21.子查询
+子查询是指在一个查询语句内部 嵌套 另一个完整的查询语句，内层查询被称为子查询。子查询可以用于获取更复杂的查询结果或者用于过滤数据。
+
+当执行包含子查询的查询语句时，数据库引擎会首先执行子查询，然后将其结果作为条件或数据源来执行外层查询。
+```sql
+SELECT name, total_amount
+FROM customers
+WHERE customer_id IN (
+    -- 子查询
+    SELECT DISTINCT customer_id
+    FROM orders
+    WHERE total_amount > 200
+);
+```
+### 22.子查询 - exists
+之前的教程讲到，子查询是一种强大的查询工具，它可以嵌套在主查询中，帮助我们进行更复杂的条件过滤和数据检索。
+
+其中，子查询中的一种特殊类型是 "exists" 子查询，用于检查主查询的结果集是否存在满足条件的记录，它返回布尔值（True 或 False），而不返回实际的数据。
+```sql
+-- 获取 不存在对应班级的 学生的所有数据，返回学生姓名（name）、年龄（age）、班级编号（class_id）字段。
+select
+  name,
+  age,
+  class_id
+from
+  student
+where
+  not exists (
+    select
+      1
+    from
+      class
+    where
+      class.id = student.class_id
+  )
+```
+
+### 23.组合查询（分表的时候用到这个）
+在 SQL 中，组合查询是一种将多个 SELECT 查询结果合并在一起的查询操作。
+
+包括两种常见的组合查询操作：UNION 和 UNION ALL。
+
+UNION 操作：它用于将两个或多个查询的结果集合并， 并去除重复的行 。即如果两个查询的结果有相同的行，则只保留一行。
+
+UNION ALL 操作：它也用于将两个或多个查询的结果集合并， 但不去除重复的行 。即如果两个查询的结果有相同的行，则全部保留。
+```sql
+-- 假设有一个学生表 student，包含以下字段：id（学号）、name（姓名）、age（年龄）、
+-- score（分数）、class_id（班级编号）。还有一个新学生表 student_new，包含的字段和学生表完全一致。
+
+-- 请编写一条 SQL 语句，获取所有学生表和新学生表的学生姓名（name）、年龄（age）、分数（score）、
+-- 班级编号（class_id）字段，要求保留重复的学生记录。
+select
+  name,
+  age,
+  score,
+  class_id
+from
+  student
+union all
+select
+  name,
+  age,
+  score,
+  class_id
+from
+  student_new
+```
+
+### 24.开窗函数 - sum over
+## 示例
+假设我们有订单表 `orders`，表格数据如下：
+
+| order_id | customer_id | order_date | total_amount |
+|----------|-------------|------------|--------------|
+| 1        | 101         | 2023-01-01 | 200          |
+| 2        | 102         | 2023-01-05 | 350          |
+| 3        | 101         | 2023-01-10 | 120          |
+| 4        | 103         | 2023-01-15 | 500          |
+
+
+
+现在，我们希望计算每个客户的订单总金额，并显示每个订单的详细信息。
+
+示例 SQL 如下：
+
+```sql
+SELECT 
+    order_id, 
+    customer_id, 
+    order_date, 
+    total_amount,
+    SUM(total_amount) OVER (PARTITION BY customer_id) AS customer_total_amount
+FROM
+    orders;
+```
+
+
+
+查询结果：
+
+| order_id | customer_id | order_date  | total_amount | customer_total_amount |
+|----------|-------------|-------------|--------------|-----------------------|
+| 1        | 101         | 2023-01-01  | 200          | 320                   |
+| 3        | 101         | 2023-01-10  | 120          | 320                   |
+| 2        | 102         | 2023-01-05  | 350          | 350                   |
+| 4        | 103         | 2023-01-15  | 500          | 500                   |
+
+
+
+在上面的示例中，我们使用开窗函数 SUM 来计算每个客户的订单总金额（customer_total_amount），并使用 PARTITION BY 子句按照customer_id 进行分组。从前两行可以看到，开窗函数保留了原始订单的详细信息，同时计算了每个客户的订单总金额。
+
+### 25.开窗函数 - sum over order by
+## 示例
+假设我们有订单表 `orders`，表格数据如下：
+
+| order_id | customer_id | order_date | total_amount |
+|----------|-------------|------------|--------------|
+| 1        | 101         | 2023-01-01 | 200          |
+| 2        | 102         | 2023-01-05 | 350          |
+| 3        | 101         | 2023-01-10 | 120          |
+| 4        | 103         | 2023-01-15 | 500          |
+
+
+
+现在，我们希望计算每个客户的历史订单累计金额，并显示每个订单的详细信息。
+
+```sql
+SELECT 
+    order_id, 
+    customer_id, 
+    order_date, 
+    total_amount,
+    SUM(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date ASC) AS cumulative_total_amount
+FROM
+    orders;
+```
+
+
+
+结果将是：
+
+| order_id | customer_id | order_date  | total_amount | cumulative_total_amount |
+|----------|-------------|-------------|--------------|-------------------------|
+| 1        | 101         | 2023-01-01  | 200          | 200                     |
+| 3        | 101         | 2023-01-10  | 120          | 320                     |
+| 2        | 102         | 2023-01-05  | 350          | 350                     |
+| 4        | 103         | 2023-01-15  | 500          | 500                     |
+
+
+
+在上面的示例中，我们使用开窗函数 SUM 来计算每个客户的历史订单累计金额（cumulative_total_amount），并使用 PARTITION BY 子句按照 customer_id 进行分组，并使用 ORDER BY 子句按照 order_date 进行排序。从结果的前两行可以看到，开窗函数保留了原始订单的详细信息，同时计算了每个客户的历史订单累计金额；相比于只用 sum over，同组内的累加列名称
+
+
+### 26.开窗函数 - rank
+## 示例
+假设我们有订单表 `orders`，表格数据如下：
+
+| order_id | customer_id | order_date | total_amount |
+|----------|-------------|------------|--------------|
+| 1        | 101         | 2023-01-01 | 200          |
+| 2        | 102         | 2023-01-05 | 350          |
+| 3        | 101         | 2023-01-10 | 120          |
+| 4        | 103         | 2023-01-15 | 500          |
+
+
+
+现在，我们希望为每个客户的订单按照订单金额降序排名，并显示每个订单的详细信息。
+
+```sql
+SELECT 
+    order_id, 
+    customer_id, 
+    order_date, 
+    total_amount,
+    RANK() OVER (PARTITION BY customer_id ORDER BY total_amount DESC) AS customer_rank
+FROM
+    orders;
+```
+
+
+
+查询结果：
+
+| order_id | customer_id | order_date | total_amount | customer_rank |
+| -------- | ----------- | ---------- | ------------ | ------------- |
+| 1        | 101         | 2023-01-01 | 200          | 1             |
+| 3        | 101         | 2023-01-10 | 120          | 2             |
+| 2        | 102         | 2023-01-05 | 350          | 1             |
+| 4        | 103         | 2023-01-15 | 500          | 1             |
+
+
+
+在上面的示例中，我们使用开窗函数 RANK 来为每个客户的订单按照订单金额降序排名（customer_rank），并使用 PARTITION BY 子句按照 customer_id 进行分组，并使用 ORDER BY 子句按照 total_amount 从大到小进行排序。
+
+可以看到，开窗函数保留了原始订单的详细信息，同时计算了每个客户的订单金额排名。
+
+
+### 27.开窗函数 - row_number
+## 示例
+假设我们有订单表 `orders`，表格数据如下：
+
+| order_id | customer_id | order_date | total_amount |
+|----------|-------------|------------|--------------|
+| 1        | 101         | 2023-01-01 | 200          |
+| 2        | 102         | 2023-01-05 | 350          |
+| 3        | 101         | 2023-01-10 | 120          |
+| 4        | 103         | 2023-01-15 | 500          |
+
+
+
+现在，我们希望为每个客户的订单按照订单金额降序排列，并且分配一个 row_number 编号，示例 SQL 语句如下：
+
+```sql
+SELECT 
+    order_id, 
+    customer_id, 
+    order_date, 
+    total_amount,
+    ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY total_amount DESC) AS row_number
+FROM
+    orders;
+```
+
+
+结果将是：
+
+| order_id | customer_id | order_date | total_amount | row_number |
+| -------- | ----------- | ---------- | ------------ | ---------- |
+| 4        | 103         | 2023-01-15 | 500          | 1          |
+| 2        | 102         | 2023-01-05 | 350          | 1          |
+| 1        | 101         | 2023-01-01 | 200          | 1          |
+| 3        | 101         | 2023-01-10 | 120          | 2          |
+
+
+
+在上面的示例中，我们使用开窗函数 ROW_NUMBER 为每个客户的订单按照订单金额降序排列，并为每个订单分配了一个编号（row_number），并使用 PARTITION BY 子句按照 customer_id 进行分组，并使用 ORDER BY 子句按照 total_amount 进行排序。
+
+
+
+
+### 28.开窗函数 - lag / lead
+## 示例
+
+以下是一个示例，假设我们有一个学生成绩表`scores`，其中包含学生的成绩和考试日期：
+
+| student_id | exam_date  | score |
+| ---------- | ---------- | ----- |
+| 101        | 2023-01-01 | 85    |
+| 101        | 2023-01-05 | 78    |
+| 101        | 2023-01-10 | 92    |
+| 101        | 2023-01-15 | 80    |
+
+
+
+现在我们想要查询每个学生的考试日期和上一次考试的成绩，以及下一次考试的成绩，示例 SQL 如下：
+
+```sql
+SELECT 
+    student_id,
+    exam_date,
+    score,
+    LAG(score, 1, NULL) OVER (PARTITION BY student_id ORDER BY exam_date) AS previous_score,
+    LEAD(score, 1, NULL) OVER (PARTITION BY student_id ORDER BY exam_date) AS next_score
+FROM
+    scores;
+```
+
+结果将是：
+
+| student_id | exam_date  | score | previous_score | next_score |
+| ---------- | ---------- | ----- | -------------- | ---------- |
+| 101        | 2023-01-01 | 85    | NULL           | 78         |
+| 101        | 2023-01-05 | 78    | 85             | 92         |
+| 101        | 2023-01-10 | 92    | 78             | 80         |
+| 101        | 2023-01-15 | 80    | 92             | NULL       |
+
+在上面的示例中，我们使用 Lag 函数获取每个学生的上一次考试成绩（previous_score），使用 Lead 函数获取每个学生的下一次考试成绩（next_score）。如果没有上一次或下一次考试，对应的列将显示为 NULL。
+
