@@ -321,7 +321,6 @@ from
 ```
 
 ### 24.开窗函数 - sum over
-## 示例
 假设我们有订单表 `orders`，表格数据如下：
 
 | order_id | customer_id | order_date | total_amount |
@@ -364,7 +363,6 @@ FROM
 在上面的示例中，我们使用开窗函数 SUM 来计算每个客户的订单总金额（customer_total_amount），并使用 PARTITION BY 子句按照customer_id 进行分组。从前两行可以看到，开窗函数保留了原始订单的详细信息，同时计算了每个客户的订单总金额。
 
 ### 25.开窗函数 - sum over order by
-## 示例
 假设我们有订单表 `orders`，表格数据如下：
 
 | order_id | customer_id | order_date | total_amount |
@@ -406,7 +404,6 @@ FROM
 
 
 ### 26.开窗函数 - rank
-## 示例
 假设我们有订单表 `orders`，表格数据如下：
 
 | order_id | customer_id | order_date | total_amount |
@@ -450,7 +447,6 @@ FROM
 
 
 ### 27.开窗函数 - row_number
-## 示例
 假设我们有订单表 `orders`，表格数据如下：
 
 | order_id | customer_id | order_date | total_amount |
@@ -493,8 +489,6 @@ FROM
 
 
 ### 28.开窗函数 - lag / lead
-## 示例
-
 以下是一个示例，假设我们有一个学生成绩表`scores`，其中包含学生的成绩和考试日期：
 
 | student_id | exam_date  | score |
